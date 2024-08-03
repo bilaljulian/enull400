@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar and Post Item</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+        .calendar-container, .form-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background-color: #c0c0c0;
+            border: 2px solid #000;
+            padding: 10px;
+        }
+        .calendar-header, .form-header {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #d3d3d3;
+            border-bottom: 2px solid #000;
+        }
+        .calendar-header h2, .form-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .calendar-header button, .form-group button {
+            background-color: #d3d3d3;
+            border: 1px solid #000;
+            font-size: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .calendar-header button:hover, .form-group button:hover {
+            background-color: #b0b0b0;
+        }
+        .calendar-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .calendar-days, .calendar-dates {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-size: 18px;
+        }
+        .calendar-days {
+            font-weight: bold;
+            background-color: #eaeaea;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+        .calendar-dates div {
+            padding: 10px;
+            border: 1px solid #000;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            position: relative;
+            text-align: center;
+        }
+        .calendar-dates div:hover {
+            background-color: #d3d3d3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #000;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .items-list {
+            margin-top: 20px;
+        }
+        .items-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .items-list ul li {
+            padding: 10px;
+            border: 1px solid #000;
+            margin-bottom: 5px;
+            background-color: #e0e0e0;
+        }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            background-color: #d3d3d3;
+            border: 1px solid #000;
+            font-size: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #b0b0b0;
+        }
+        .post-ad-button {
+            background-color: #c0c0c0; /* Classic gray background */
+            border: 2px outset #dcdcdc; /* 3D outset effect */
+            padding: 10px 20px;
+            color: #000;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            display: inline-block;
+            margin: 20px;
+            text-align: center;
+            width: 100px; /* Fixed width for uniformity */
+            box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3); /* Slight shadow for depth */
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .post-ad-button:hover {
+            background-color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Calendar Section -->
+    <div class="calendar-container" id="calendarSection">
+        <div class="calendar-header">
+            <button id="prevMonth">&lt;</button>
+            <h2 id="monthYear"></h2>
+            <button id="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-body">
+            <div class="calendar-days">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div class="calendar-dates" id="calendarDates">
+                <!-- Dates will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-container" id="formSection" style="display: none;">
+        <div class="form-header">
+            <button class="back-button" id="backButton">Back to Calendar</button>
+            <h1>Post Rare Item for <span id="selectedDate"></span></h1>
+        </div>
+        <form id="itemForm">
+            <div class="form-group">
+                <label for="itemName">Item Name:</label>
+                <input type="text" id="itemName" name="itemName" required>
+            </div>
+            <div class="form-group">
+                <label for="itemLink">Item Link:</label>
+                <input type="url" id="itemLink" name="itemLink" required>
+            </div>
+            <div class="form-group">
+                <label for="itemDescription">Item Description:</label>
+                <textarea id="itemDescription" name="itemDescription" rows="4"></textarea>
+            </div>
+        </form>
+        <a href="https://enull450.vercel.app/" class="post-ad-button">Post Ad</a>
+        <div class="items-list" id="itemsList">
+            <!-- Posted items will appear here -->
+        </div>
+    </div>
+
+    <script>
+        const monthYear = document.getElementById('monthYear');
+        const calendarDates = document.getElementById('calendarDates');
+        const prevMonthButton = document.getElementById('prevMonth');
+        const nextMonthButton = document.getElementById('nextMonth');
+        const calendarSection = document.getElementById('calendarSection');
+        const formSection = document.getElementById('formSection');
+        const backButton = document.getElementById('backButton');
+        const selectedDateElement = document.getElementById('selectedDate');
+        const itemForm = document.getElementById('itemForm');
+        const itemsList = document.getElementById('itemsList');
+
+        let currentDate = new Date();
+
+        function renderCalendar(date) {
+            calendarDates.innerHTML = ''; // Clear previous dates
+
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            monthYear.textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            // Create empty slots for days before the first day of the month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const emptyCell = document.createElement('div');
+                calendarDates.appendChild(emptyCell);
+            }
+
+            // Create day slots
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateCell = document.createElement('div');
+                dateCell.textContent = day;
+                dateCell.dataset.date = `${year}-${month + 1}-${day}`;
+                dateCell.addEventListener('click', handleDateClick);
+                calendarDates.appendChild(dateCell);
+            }
+
+            // Highlight today's date
+            const today = new Date();
+            if (today.getFullYear() === year && today.getMonth() === month) {
+                const todayCell = Array.from(calendarDates.children).find(child => child.dataset.date === `${year}-${month + 1}-${today.getDate()}`);
+                if (todayCell) {
+                    todayCell.style.backgroundColor = '#b0e0e6'; // Light blue color for today
+                }
+            }
+        }
+
+        function handleDateClick(event) {
+            const selectedDate = event.currentTarget.dataset.date;
+            selectedDateElement.textContent = new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            calendarSection.style.display = 'none';
+            formSection.style.display = 'block';
+        }
+
+        function handleBackButtonClick() {
+            calendarSection.style.display = 'block';
+            formSection.style.display = 'none';
+        }
+
+        prevMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+
+        nextMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+
+        backButton.addEventListener('click', handleBackButtonClick);
+
+        renderCalendar(currentDate);
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eNull - Rare Items Marketplace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            min-height: 100vh; /* Ensures the body takes up at least the full height of the viewport */
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1; /* Allows the content to grow and take up available space */
+            width: 80%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        footer {
+            background-color: blue; /* Blue background for footer */
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            width: 106%; /* Set the width of the footer */
+            margin: 0 auto; /* Center the footer */
+            position: relative; /* Relative positioning for footer */
+            bottom: 0;
+            left: 0;
+        }
+        footer ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        footer li {
+            margin: 5px 10px;
+        }
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+        .footer-text {
+            font-size: 14px;
+        }
+        .trademark {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <!-- Main content goes here -->
+    </div>
+    <footer>
+        <ul>
+         <a href="https://enull900.vercel.app/">View Listings</a>
+
+            <li><a href="https://enull1000.vercel.app/">About eNull</a></li>
+            <li><a href="https://enull1000.vercel.app/">Contact eNull</a></li>
+            <li><a href="https://enull1000.vercel.app/">Help</a></li>
+            <li><a href="https://enull1000.vercel.app/">Safety Center</a></li>
+            <li><a href="https://enull1000.vercel.app/">Safety Guidelines</a></li>
+            <li><a href="https://enull1000.vercel.app/">Common Scams</a></li>
+            <li><a href="https://enull1000.vercel.app/">Do Not Sell My Information</a></li>
+            <li><a href="https://enull1000.vercel.app/">Cookie Policy</a></li>
+            <li><a href="https://enull1000.vercel.app/">Terms of Use</a></li>
+            <li><a href="https://enull1000.vercel.app/">Fundraising</a></li>
+            <li><a href="https://enull1000.vercel.app/">Advertising</a></li>
+            <li><a href="https://enull1300.vercel.app/">1</a></li>
+            <li><a href="https://enull1400.vercel.app/">2</a></li>
+            <li><a href="https://enull1500.vercel.app/">3</a></li>
+            <li><a href="https://enull1600.vercel.app/">4</a></li>
+            <li><a href="https://vercel.com/bilals-projects-a9be4963/enull1700">5</a></li>
+            <li><a href="https://enull1800.vercel.app/">6</a></li>
+            <li><a href="https://enull1900.vercel.app/">7</a></li>
+            <li><a href="https://enull2000.vercel.app/">8</a></li>
+            <li><a href="https://enill2100.vercel.app/">9</a></li>
+            <li><a href="https://enull2200.vercel.app/">10</a></li>
+            <li><a href="https://enull2300.vercel.app/">11</a></li>
+            <li><a href="https://enull2400.vercel.app/">12</a></li>
+            <li><a href="https://enull2800.vercel.app/">Login</a></li>
+        </ul>
+        <div class="footer-text">
+            &copy; <span id="year"></span> eNull. All rights reserved. Copyrighted.
+        </div>
+        <div class="trademark">
+            eNull™ is a trademark of eNull Inc. All other trademarks and brands are property of their respective owners.
+        </div>
+    </footer>
+
+    <script>
+        // Update the copyright year automatically
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+<script type="text/javascript">
+var infolinks_pid = 3423311;
+var infolinks_wsid = 0 ;
+</script>
+<script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script	
+<script type="text/javascript" src="https://s.skimresources.com/js/268122X1753462.skimlinks.js"></script>
+<body>
+<amp-skimlinks layout="nodisplay" publisher-code="268122X1753462"></amp-skimlinks>
+</body>
+</html>
